@@ -1,0 +1,12 @@
+.gradle
+build
+jars
+out
+run
+gradlew
+*.iml
+*.ipr
+*.iws
+.idea
+*.json
+.DS_Store

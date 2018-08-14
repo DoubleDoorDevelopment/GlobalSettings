@@ -1,0 +1,22 @@
+[
+  {
+    "modid": "globalsettings",
+    "name": "GlobalSettings",
+    "description": "",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "DoubleDoorDev",
+      "Claycorp",
+      "Dries007"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": [
+      ""
+    ]
+  }
+]
