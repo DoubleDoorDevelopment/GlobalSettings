@@ -3,13 +3,12 @@ package net.doubledoordev.globalsettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 
 @Mod(
         modid = GlobalSettings.MOD_ID,
@@ -43,12 +42,11 @@ public class GlobalSettings
         File settingsFolder = new File(System.getProperty("user.home") + "/minecraftglobalsettings");
         File settings = new File(settingsFolder, "options.txt");
 
-        // optionsFile is private thus we need to make it accessible.
-        Field field = ReflectionHelper.findField(GameSettings.class, "optionsFile");
-        field.setAccessible(true);
+        // optionsFile is private thus we need to do some magic to change it.
+        File settingsfile = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getMinecraft().gameSettings, "field_74354_ai", "optionsFile");
         try
         {
-            log.info("Original settings path: " + field.get(Minecraft.getMinecraft().gameSettings));
+            log.info("Original settings path: " + settingsfile.getAbsolutePath());
             // If our folder is created....
             if (settingsFolder.mkdir())
             {
@@ -62,19 +60,19 @@ public class GlobalSettings
             {
                 // if our file exists set the settings to ours.
                 log.info("Settings exist changing game settings to our own.");
-                field.set(Minecraft.getMinecraft().gameSettings, settings);
+                ObfuscationReflectionHelper.setPrivateValue(GameSettings.class, Minecraft.getMinecraft().gameSettings, settings, "field_74354_ai", "optionsFile");
             }
             // otherwise make a new file and set the settings.
             else
             {
                 log.info("File missing, creating and changing game settings to our own.");
                 settings.createNewFile();
-                field.set(Minecraft.getMinecraft().gameSettings, settings);
+                ObfuscationReflectionHelper.setPrivateValue(GameSettings.class, Minecraft.getMinecraft().gameSettings, settings, "field_74354_ai", "optionsFile");
             }
 
-            log.info("New settings path: " + field.get(Minecraft.getMinecraft().gameSettings));
+            log.info("New settings path: " + settingsfile.getAbsolutePath());
         }
-        catch (IllegalAccessException | IOException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
