@@ -3,6 +3,7 @@ package net.doubledoordev.globalsettings;
 import com.google.common.base.Splitter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.util.SoundCategory;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.io.IOUtils;
 
@@ -37,7 +38,7 @@ public class Utils
             masterFolder = new File(System.getProperty("user.home"), "minecraftGlobalSettings");
             masterFolder.mkdir();
             masterSettingFile = new File(masterFolder, "masterOptions.txt");
-            GlobalSettings.log.warn("No property or non-linux environment! Master settings home is: " + masterSettingFile);
+            GlobalSettings.log.warn("No java property and/or non-linux environment! Master settings home is: " + masterSettingFile);
         }
         // If we find one we will use that.
         // TODO: If this path fails it might crash or cause issues, We need to check that.
@@ -226,7 +227,7 @@ public class Utils
         if (masterOptions.containsKey("autoLoad"))
         {
             GlobalSettings.log.warn("Auto loading option exists!");
-            if (masterOptions.get("autoLoad").equals("True"))
+            if (masterOptions.get("autoLoad").equals("true"))
             {
                 GlobalSettings.log.warn("Auto loading true!");
                 return true;
@@ -248,23 +249,24 @@ public class Utils
     {
         if (!masterOptions.containsKey("autoLoad"))
         {
-            masterOptions.put("autoLoad", "True");
+            masterOptions.put("autoLoad", "true");
             GlobalSettings.log.warn("Auto Load key is missing! Adding.");
         }
-        else if (masterOptions.get("autoLoad").equals("True"))
+        else if (masterOptions.get("autoLoad").equals("true"))
         {
-            masterOptions.replace("autoLoad", "False");
+            masterOptions.replace("autoLoad", "false");
             GlobalSettings.log.warn("Auto Load key exists! Setting to false.");
         }
         else
         {
-            masterOptions.replace("autoLoad", "True");
+            masterOptions.replace("autoLoad", "true");
             GlobalSettings.log.warn("Auto Load key exists! Setting to true.");
         }
     }
 
     void replaceVanillaOptions()
     {
+        // Writes all the options in a vanilla format to the options.txt file
         PrintWriter printWriter = null;
         try
         {
@@ -285,5 +287,11 @@ public class Utils
            if (printWriter != null)
                printWriter.close();
         }
+
+        // We need to load our settings now so it is applied to minecraft.
+        Minecraft.getMinecraft().gameSettings.loadOptions();
+        // Then we need to apply the sound changes to the game else they never update.
+        for (String sound: SoundCategory.getSoundCategoryNames())
+            Minecraft.getMinecraft().gameSettings.setSoundLevel(SoundCategory.getByName(sound), Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.getByName(sound)));
     }
 }
