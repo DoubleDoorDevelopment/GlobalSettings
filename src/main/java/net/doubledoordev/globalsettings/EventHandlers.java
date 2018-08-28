@@ -18,16 +18,16 @@ public class EventHandlers
         // Replaces and loads from master file.
         if(event.getGui() instanceof GuiOptions && event.getButton().id == 1568123)
         {
-            GlobalSettings.log.warn("Attempting to load master file!");
+            GlobalSettings.log.info("Attempting to load master file!");
             util.replaceVanillaOptions();
-            GlobalSettings.log.warn("Loaded Global options!");
+            GlobalSettings.log.info("Loaded Global options!");
         }
 
         // Update Master button
         // Updates master file with the current set of options being used.
         if(event.getGui() instanceof GuiOptions && event.getButton().id == 1568124)
         {
-            GlobalSettings.log.warn("Updating master file!");
+            GlobalSettings.log.info("Updating master file!");
                 util.getAllOptions();
                 util.updateMaster();
                 util.saveMaster();
@@ -37,16 +37,16 @@ public class EventHandlers
         // Toggles the text on the
         if(event.getGui() instanceof GuiOptions && event.getButton().id == 1568125)
         {
-            GlobalSettings.log.warn("Getting correct value for auto load button.");
+            GlobalSettings.log.info("Getting correct value for auto load button.");
             if (util.shouldAutoLoad())
             {
                 event.getButton().displayString = "Auto-Load Options: True";
-                GlobalSettings.log.warn("Changing auto load value to " + util.shouldAutoLoad());
+                GlobalSettings.log.info("Changing auto load value to " + util.shouldAutoLoad());
             }
             else
             {
                 event.getButton().displayString = "Auto-Load Options: False";
-                GlobalSettings.log.warn("Changing auto load value to " + util.shouldAutoLoad());
+                GlobalSettings.log.info("Changing auto load value to " + util.shouldAutoLoad());
             }
         }
     }
@@ -58,7 +58,7 @@ public class EventHandlers
         // Auto Update button
         if (event.getGui() instanceof GuiOptions && event.getButton().id == 1568125)
         {
-            GlobalSettings.log.warn("Changing auto-load option!");
+            GlobalSettings.log.info("Changing auto-load option!");
             util.updateAutoLoad();
             util.saveMaster();
         }
@@ -66,12 +66,12 @@ public class EventHandlers
         // Replaces and loads settings only if auto load is enabled. Otherwise acts like vanilla.
         if (event.getGui() instanceof GuiMainMenu && event.getButton().id == 0 || event.getGui() instanceof GuiIngameMenu && event.getButton().id == 0)
         {
-            GlobalSettings.log.warn("Checking auto load options for replacing options in options screen.");
+            GlobalSettings.log.info("Checking auto load options for replacing options in options screen.");
             if (util.shouldAutoLoad())
             {
-                GlobalSettings.log.warn("Loading master options for options screen!");
+                GlobalSettings.log.info("Loading master options for options screen!");
                 util.replaceVanillaOptions();
-                GlobalSettings.log.warn("Loaded Global options!");
+                GlobalSettings.log.info("Loaded Global options!");
             }
             GlobalSettings.log.warn("Auto loading disabled, Manually load master options with load button!");
         }

@@ -17,7 +17,7 @@ public class GlobalSettings
 {
      static final String MOD_ID = "globalsettings";
      static final String MOD_NAME = "GlobalSettings";
-     static final String VERSION = "3.0.0";
+     static final String VERSION = "3.0.1";
 
      static Logger log;
 
@@ -57,12 +57,12 @@ public class GlobalSettings
         if (util.checkMasterFile())
         {
             util.getAllOptions();
-            GlobalSettings.log.warn("Auto loading file check OK!");
+            GlobalSettings.log.info("Auto loading file check OK!");
             if (util.shouldAutoLoad())
             {
-                GlobalSettings.log.warn("Auto loading master settings!");
+                GlobalSettings.log.info("Auto loading master settings!");
                 util.replaceVanillaOptions();
-                GlobalSettings.log.warn("Loaded Global options!");
+                GlobalSettings.log.info("Loaded Global options!");
             }
         } else util.makeMaster();
     }

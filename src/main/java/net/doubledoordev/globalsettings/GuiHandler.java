@@ -14,7 +14,7 @@ public class GuiHandler
     public static void open(GuiScreenEvent.InitGuiEvent.Post e)
     {
         String autoLoadText;
-        GlobalSettings.log.warn("Checking auto load for toggle button text.");
+        GlobalSettings.log.info("Checking auto load for toggle button text.");
         if (GlobalSettings.util.shouldAutoLoad())
             autoLoadText = "Auto-Load Options: True";
         else autoLoadText = "Auto-Load Options: False";

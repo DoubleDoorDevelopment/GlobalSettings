@@ -26,7 +26,7 @@ public class Utils
     private Properties properties = new Properties();
     private static final Splitter EQUALS_SPLITTER = Splitter.on('=');
 
-    // We need to set the location of the master options file.
+    // We need to set the location of the master options file. Java property takes precedence over everything.
     void setMasterFile()
     {
         String optionsLocationProperty = System.getProperty("master.properties.location");
@@ -34,44 +34,58 @@ public class Utils
         // First we check to see if there is a system property available.
         if (optionsLocationProperty == null)
         {
-            // If our property is null we will default to the user home.
-            masterFolder = new File(System.getProperty("user.home"), "minecraftGlobalSettings");
-            masterFolder.mkdir();
-            masterSettingFile = new File(masterFolder, "masterOptions.txt");
-            GlobalSettings.log.warn("No java property and/or non-linux environment! Master settings home is: " + masterSettingFile);
+            setMasterLocation();
+            GlobalSettings.log.info("No java property found!");
         }
-        // If we find one we will use that.
-        // TODO: If this path fails it might crash or cause issues, We need to check that.
+        // If we do have a property then use that. We also need to check to make sure we can write there...
         else
         {
-            // Check to see if we are running in a linux environment and apply the proper location for these.
-            if (System.getProperty("os.arch").equals("Linux"))
+            masterFolder = new File(optionsLocationProperty);
+            if (masterFolder.mkdirs() || masterFolder.canWrite())
             {
-                masterFolder = new File(System.getenv("XDG_CONFIG_HOME"),"minecraftGlobalSettings");
                 masterFolder.mkdir();
                 masterSettingFile = new File(masterFolder, "masterOptions.txt");
-                GlobalSettings.log.warn("Linux Environment Variable found! Master settings home is: " + masterSettingFile);
+                GlobalSettings.log.info("Using java property! Master settings home is: " + masterSettingFile);
             }
             else
             {
-                masterFolder = new File(optionsLocationProperty);
-                masterFolder.mkdirs();
-                masterSettingFile = new File(masterFolder, "masterOptions.txt");
-                GlobalSettings.log.warn("Property found! Master settings home is: " + masterSettingFile);
+                GlobalSettings.log.error("Java property is invalid or can't be written! Switching to default checks!");
+                setMasterLocation();
             }
         }
     }
 
+    // Checks for linux otherwise we use user home.
+    void setMasterLocation()
+    {
+        // If we are in linux use the special place
+        GlobalSettings.log.warn("Looking for Linux...");
+        if (System.getProperty("os.name").toLowerCase().contains("linux"))
+        {
+            masterFolder = new File(Optional.ofNullable(System.getenv("XDG_CONFIG_DIR")).orElseGet(() -> System.getProperty("user.home") + File.separator + ".config"), "minecraftGlobalSettings");
+            masterFolder.mkdir();
+            masterSettingFile = new File(masterFolder, "masterOptions.txt");
+            GlobalSettings.log.info("Linux environment found! Master settings home is: " + masterSettingFile);
+        }
+        else
+        {
+            // If our property is null and its not linux, we will default to the user home.
+            masterFolder = new File(System.getProperty("user.home"), "minecraftGlobalSettings");
+            masterFolder.mkdir();
+            masterSettingFile = new File(masterFolder, "masterOptions.txt");
+            GlobalSettings.log.info("No linux environment found! Master settings home is: " + masterSettingFile);
+        }
+    }
     // Getting the master file location as a file.
      File getMasterFile()
     {
         // We should check if the master file exists before returning it.
         if (!masterSettingFile.exists())
         {
-            GlobalSettings.log.warn("Master is missing! Can't return master!");
+            GlobalSettings.log.error("Master is missing! Can't return master!");
         }
         // If our file exists return it.
-        GlobalSettings.log.warn("Got Master!");
+        GlobalSettings.log.info("Got Master!");
         return masterSettingFile;
     }
 
@@ -80,11 +94,11 @@ public class Utils
     {
         if (!masterSettingFile.exists())
         {
-            GlobalSettings.log.warn("Master is missing!");
+            GlobalSettings.log.error("Master is missing!");
             return false;
         }
         // If our file exists return it.
-        GlobalSettings.log.warn("Master exists!");
+        GlobalSettings.log.info("Master exists!");
         return true;
     }
 
@@ -94,7 +108,7 @@ public class Utils
             try
             {
                 masterSettingFile.createNewFile();
-                GlobalSettings.log.warn("Creating master file in: " + masterSettingFile);
+                GlobalSettings.log.info("Creating master file in: " + masterSettingFile);
             }
             catch (IOException e)
             {
@@ -108,7 +122,7 @@ public class Utils
             for (Map.Entry<String, String> option : options.entrySet())
             {
                     masterOptions.put(option.getKey(), option.getValue());
-                    GlobalSettings.log.warn("Adding option: " + option.getKey());
+                    GlobalSettings.log.info("Adding option: " + option.getKey());
             }
     }
 
@@ -122,7 +136,7 @@ public class Utils
         {
             fileOutputStream = new FileOutputStream(masterSettingFile);
             properties.store(fileOutputStream, null);
-            GlobalSettings.log.warn("Saving file!");
+            GlobalSettings.log.info("Saving file!");
         }
         catch (IOException e)
         {
@@ -223,18 +237,18 @@ public class Utils
 
     boolean shouldAutoLoad()
     {
-        GlobalSettings.log.warn("Checking for auto load value...");
+        GlobalSettings.log.info("Checking for auto load value...");
         if (masterOptions.containsKey("autoLoad"))
         {
-            GlobalSettings.log.warn("Auto loading option exists!");
+            GlobalSettings.log.info("Auto loading option exists!");
             if (masterOptions.get("autoLoad").equals("true"))
             {
-                GlobalSettings.log.warn("Auto loading true!");
+                GlobalSettings.log.info("Auto loading true!");
                 return true;
             }
             else
             {
-                GlobalSettings.log.warn("Auto loading is disabled!");
+                GlobalSettings.log.info("Auto loading is disabled!");
                 return false;
             }
         }
@@ -255,12 +269,12 @@ public class Utils
         else if (masterOptions.get("autoLoad").equals("true"))
         {
             masterOptions.replace("autoLoad", "false");
-            GlobalSettings.log.warn("Auto Load key exists! Setting to false.");
+            GlobalSettings.log.info("Auto Load key exists! Setting to false.");
         }
         else
         {
             masterOptions.replace("autoLoad", "true");
-            GlobalSettings.log.warn("Auto Load key exists! Setting to true.");
+            GlobalSettings.log.info("Auto Load key exists! Setting to true.");
         }
     }
 
@@ -276,7 +290,7 @@ public class Utils
             {
                 printWriter.println(option.getKey() + ":" + option.getValue());
             }
-            GlobalSettings.log.warn("Replaced vanilla file!");
+            GlobalSettings.log.info("Replaced vanilla file!");
         }
         catch (IOException e)
         {
