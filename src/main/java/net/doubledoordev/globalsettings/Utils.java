@@ -1,15 +1,15 @@
 package net.doubledoordev.globalsettings;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
 import com.google.common.base.Splitter;
+import org.apache.commons.io.IOUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import org.apache.commons.io.IOUtils;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 import static net.minecraft.client.settings.GameSettings.COLON_SPLITTER;
 
@@ -306,6 +306,8 @@ public class Utils
         Minecraft.getMinecraft().gameSettings.loadOptions();
         // Then we need to apply the sound changes to the game else they never update.
         for (String sound: SoundCategory.getSoundCategoryNames())
+        {
             Minecraft.getMinecraft().gameSettings.setSoundLevel(SoundCategory.getByName(sound), Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.getByName(sound)));
+        }
     }
 }

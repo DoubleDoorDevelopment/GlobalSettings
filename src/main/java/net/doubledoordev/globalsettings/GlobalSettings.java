@@ -1,11 +1,12 @@
 package net.doubledoordev.globalsettings;
 
+import java.io.IOException;
+
+import org.apache.logging.log4j.Logger;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
 
 @Mod(
         modid = GlobalSettings.MOD_ID,
@@ -17,7 +18,7 @@ public class GlobalSettings
 {
      static final String MOD_ID = "globalsettings";
      static final String MOD_NAME = "GlobalSettings";
-     static final String VERSION = "3.0.1";
+    static final String VERSION = "3.0.2";
 
      static Logger log;
 
@@ -52,7 +53,11 @@ public class GlobalSettings
                 e.printStackTrace();
             }
         }
+    }
 
+    @Mod.EventHandler
+    public void postinit(FMLPostInitializationEvent event)
+    {
         // Do our magic if we have a master file and auto load is enabled. Otherwise just make one.
         if (util.checkMasterFile())
         {
