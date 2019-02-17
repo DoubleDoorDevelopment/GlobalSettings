@@ -6,19 +6,17 @@ import java.util.*;
 
 import com.google.common.base.Splitter;
 import org.apache.commons.io.IOUtils;
+import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.SoundCategory;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-
-import static net.minecraft.client.settings.GameSettings.COLON_SPLITTER;
 
 public class Utils
 {
 
     private File masterFolder;
     private File masterSettingFile;
-    File vanillaSettings = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getMinecraft().gameSettings, "field_74354_ai", "optionsFile");
+    File vanillaSettings = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().gameSettings, "field_74354_ai");
     private Map<String, String> masterOptions = new HashMap<>();
     private Map<String, String> options = new HashMap<>();
     private List<String> masterOptionsRaw;
@@ -35,7 +33,7 @@ public class Utils
         if (optionsLocationProperty == null)
         {
             setMasterLocation();
-            GlobalSettings.log.info("No java property found!");
+            GlobalSettings.LOGGER.info("No java property found!");
         }
         // If we do have a property then use that. We also need to check to make sure we can write there...
         else
@@ -45,11 +43,11 @@ public class Utils
             {
                 masterFolder.mkdir();
                 masterSettingFile = new File(masterFolder, "masterOptions.txt");
-                GlobalSettings.log.info("Using java property! Master settings home is: " + masterSettingFile);
+                GlobalSettings.LOGGER.info("Using java property! Master settings home is: " + masterSettingFile);
             }
             else
             {
-                GlobalSettings.log.error("Java property is invalid or can't be written! Switching to default checks!");
+                GlobalSettings.LOGGER.error("Java property is invalid or can't be written! Switching to default checks!");
                 setMasterLocation();
             }
         }
@@ -59,13 +57,13 @@ public class Utils
     void setMasterLocation()
     {
         // If we are in linux use the special place
-        GlobalSettings.log.warn("Looking for Linux...");
+        GlobalSettings.LOGGER.warn("Looking for Linux...");
         if (System.getProperty("os.name").toLowerCase().contains("linux"))
         {
             masterFolder = new File(Optional.ofNullable(System.getenv("XDG_CONFIG_DIR")).orElseGet(() -> System.getProperty("user.home") + File.separator + ".config"), "minecraftGlobalSettings");
             masterFolder.mkdir();
             masterSettingFile = new File(masterFolder, "masterOptions.txt");
-            GlobalSettings.log.info("Linux environment found! Master settings home is: " + masterSettingFile);
+            GlobalSettings.LOGGER.info("Linux environment found! Master settings home is: " + masterSettingFile);
         }
         else
         {
@@ -73,7 +71,7 @@ public class Utils
             masterFolder = new File(System.getProperty("user.home"), "minecraftGlobalSettings");
             masterFolder.mkdir();
             masterSettingFile = new File(masterFolder, "masterOptions.txt");
-            GlobalSettings.log.info("No linux environment found! Master settings home is: " + masterSettingFile);
+            GlobalSettings.LOGGER.info("No linux environment found! Master settings home is: " + masterSettingFile);
         }
     }
     // Getting the master file location as a file.
@@ -82,10 +80,10 @@ public class Utils
         // We should check if the master file exists before returning it.
         if (!masterSettingFile.exists())
         {
-            GlobalSettings.log.error("Master is missing! Can't return master!");
+            GlobalSettings.LOGGER.error("Master is missing! Can't return master!");
         }
         // If our file exists return it.
-        GlobalSettings.log.info("Got Master!");
+        GlobalSettings.LOGGER.info("Got Master!");
         return masterSettingFile;
     }
 
@@ -94,11 +92,11 @@ public class Utils
     {
         if (!masterSettingFile.exists())
         {
-            GlobalSettings.log.error("Master is missing!");
+            GlobalSettings.LOGGER.error("Master is missing!");
             return false;
         }
         // If our file exists return it.
-        GlobalSettings.log.info("Master exists!");
+        GlobalSettings.LOGGER.info("Master exists!");
         return true;
     }
 
@@ -108,7 +106,7 @@ public class Utils
             try
             {
                 masterSettingFile.createNewFile();
-                GlobalSettings.log.info("Creating master file in: " + masterSettingFile);
+                GlobalSettings.LOGGER.info("Creating master file in: " + masterSettingFile);
             }
             catch (IOException e)
             {
@@ -122,7 +120,7 @@ public class Utils
             for (Map.Entry<String, String> option : options.entrySet())
             {
                     masterOptions.put(option.getKey(), option.getValue());
-                    GlobalSettings.log.info("Adding option: " + option.getKey());
+                GlobalSettings.LOGGER.info("Adding option: " + option.getKey());
             }
     }
 
@@ -136,7 +134,7 @@ public class Utils
         {
             fileOutputStream = new FileOutputStream(masterSettingFile);
             properties.store(fileOutputStream, null);
-            GlobalSettings.log.info("Saving file!");
+            GlobalSettings.LOGGER.info("Saving file!");
         }
         catch (IOException e)
         {
@@ -185,7 +183,7 @@ public class Utils
                     }
                     catch (Exception e)
                     {
-                        GlobalSettings.log.warn("Skipping bad master option: {}", s);
+                        GlobalSettings.LOGGER.warn("Skipping bad master option: {}", s);
                     }
                 }
             }
@@ -195,12 +193,12 @@ public class Utils
             {
                 try
                 {
-                    Iterator<String> iterator = COLON_SPLITTER.omitEmptyStrings().limit(2).split(s).iterator();
+                    Iterator<String> iterator = GameSettings.COLON_SPLITTER.omitEmptyStrings().limit(2).split(s).iterator();
                     options.put(iterator.next(), iterator.next());
                 }
                 catch (Exception e)
                 {
-                    GlobalSettings.log.warn("Skipping bad vanilla option: {}", s);
+                    GlobalSettings.LOGGER.warn("Skipping bad vanilla option: {}", s);
                 }
             }
         }
@@ -237,24 +235,24 @@ public class Utils
 
     boolean shouldAutoLoad()
     {
-        GlobalSettings.log.info("Checking for auto load value...");
+        GlobalSettings.LOGGER.info("Checking for auto load value...");
         if (masterOptions.containsKey("autoLoad"))
         {
-            GlobalSettings.log.info("Auto loading option exists!");
+            GlobalSettings.LOGGER.info("Auto loading option exists!");
             if (masterOptions.get("autoLoad").equals("true"))
             {
-                GlobalSettings.log.info("Auto loading true!");
+                GlobalSettings.LOGGER.info("Auto loading true!");
                 return true;
             }
             else
             {
-                GlobalSettings.log.info("Auto loading is disabled!");
+                GlobalSettings.LOGGER.info("Auto loading is disabled!");
                 return false;
             }
         }
         else
         {
-            GlobalSettings.log.warn("Auto loading option is missing! Auto loading disabled. Please enable if you would like auto load to function!");
+            GlobalSettings.LOGGER.warn("Auto loading option is missing! Auto loading disabled. Please enable if you would like auto load to function!");
             return false;
         }
     }
@@ -264,17 +262,17 @@ public class Utils
         if (!masterOptions.containsKey("autoLoad"))
         {
             masterOptions.put("autoLoad", "true");
-            GlobalSettings.log.warn("Auto Load key is missing! Adding.");
+            GlobalSettings.LOGGER.warn("Auto Load key is missing! Adding.");
         }
         else if (masterOptions.get("autoLoad").equals("true"))
         {
             masterOptions.replace("autoLoad", "false");
-            GlobalSettings.log.info("Auto Load key exists! Setting to false.");
+            GlobalSettings.LOGGER.info("Auto Load key exists! Setting to false.");
         }
         else
         {
             masterOptions.replace("autoLoad", "true");
-            GlobalSettings.log.info("Auto Load key exists! Setting to true.");
+            GlobalSettings.LOGGER.info("Auto Load key exists! Setting to true.");
         }
     }
 
@@ -290,7 +288,7 @@ public class Utils
             {
                 printWriter.println(option.getKey() + ":" + option.getValue());
             }
-            GlobalSettings.log.info("Replaced vanilla file!");
+            GlobalSettings.LOGGER.info("Replaced vanilla file!");
         }
         catch (IOException e)
         {
@@ -303,11 +301,19 @@ public class Utils
         }
 
         // We need to load our settings now so it is applied to minecraft.
-        Minecraft.getMinecraft().gameSettings.loadOptions();
+        Minecraft.getInstance().gameSettings.loadOptions();
         // Then we need to apply the sound changes to the game else they never update.
-        for (String sound: SoundCategory.getSoundCategoryNames())
+        for (SoundCategory sound : SoundCategory.values())
         {
-            Minecraft.getMinecraft().gameSettings.setSoundLevel(SoundCategory.getByName(sound), Minecraft.getMinecraft().gameSettings.getSoundLevel(SoundCategory.getByName(sound)));
+            Minecraft.getInstance().gameSettings.setSoundLevel(sound, Minecraft.getInstance().gameSettings.getSoundLevel(sound));
         }
+    }
+
+    String getAutoloadState()
+    {
+        if (masterOptions.get("autoLoad") == null)
+            return "false";
+        else
+            return masterOptions.get("autoLoad");
     }
 }
