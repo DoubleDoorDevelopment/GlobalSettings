@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 
@@ -33,8 +33,6 @@ public class GlobalSettings
     //PreInit
     private void setup(final FMLCommonSetupEvent event)
     {
-        MinecraftForge.EVENT_BUS.register(new EventHandlers());
-
         util.setMasterFile();
         // We need to make sure the options.txt file is there before we try to write to it because fresh instances don't have it.
         if (!util.vanillaSettings.exists())
@@ -50,7 +48,8 @@ public class GlobalSettings
         }
     }
 
-    private void doClientStuff(final FMLClientSetupEvent event)
+    // Must be done in InterModEnqueueEvent or the sounds aren't there yet to be set.
+    private void doClientStuff(final InterModEnqueueEvent event)
     {
         // Do our magic if we have a master file and auto load is enabled. Otherwise just make one.
         if (util.checkMasterFile())
