@@ -2,6 +2,7 @@ package net.doubledoordev.globalsettings;
 
 import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,22 +30,26 @@ public class GuiHandler
             }
             GlobalSettings.LOGGER.warn("Auto loading disabled, Manually load master options with load button!");
 
-            e.addWidget(new Button(e.getGui().width / 2 - 195, e.getGui().height / 6 + 168, 90, 20, "Load Master", (button) -> {
+            int width = e.getGui().field_230708_k_;
+            int height = e.getGui().field_230709_l_;
+
+            e.addWidget(new Button(width / 2 - 195, height / 6 + 168, 90, 20, new TranslationTextComponent("globalsettings.load"), (button) -> {
                 GlobalSettings.LOGGER.info("Attempting to load master file!");
                 util.replaceVanillaOptions();
                 GlobalSettings.LOGGER.info("Loaded Global options!");
             }));
-            e.addWidget(new Button(e.getGui().width / 2 + 105, e.getGui().height / 6 + 168, 90, 20, "Update Master", (button) -> {
+            e.addWidget(new Button(width / 2 + 105, height / 6 + 168, 90, 20, new TranslationTextComponent("globalsettings.update"), (button) -> {
                 GlobalSettings.LOGGER.info("Updating master file!");
                 util.getAllOptions();
                 util.updateMaster();
                 util.saveMaster();
             }));
-            e.addWidget(new Button(e.getGui().width / 2 - 70, e.getGui().height / 6 + 144, 144, 20, "Auto-Load Options: " + util.getAutoloadState().toUpperCase(), (button) -> {
+            TranslationTextComponent autoLoadMessage = new TranslationTextComponent("globalsettings.autoload", util.getAutoloadState().toUpperCase());
+            e.addWidget(new Button(width / 2 - 70, height / 6 + 144, 144, 20, autoLoadMessage, (button) -> {
                 GlobalSettings.LOGGER.info("Changing auto-load option!");
                 util.updateAutoLoad();
                 util.saveMaster();
-                button.setMessage("Auto-Load Options: " + util.getAutoloadState().toUpperCase());
+                button.func_238482_a_(new TranslationTextComponent("globalsettings.autoload", util.getAutoloadState().toUpperCase()));
             }));
         }
 
