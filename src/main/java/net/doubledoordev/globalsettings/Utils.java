@@ -17,11 +17,11 @@ public class Utils
     private File masterFolder;
     private File masterSettingFile;
     File vanillaSettings = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().gameSettings, "field_74354_ai");
-    private Map<String, String> masterOptions = new HashMap<>();
-    private Map<String, String> options = new HashMap<>();
+    private final Map<String, String> masterOptions = new HashMap<>();
+    private final Map<String, String> options = new HashMap<>();
     private List<String> masterOptionsRaw;
     private List<String> optionsRaw;
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
     private static final Splitter EQUALS_SPLITTER = Splitter.on('=');
 
     // We need to set the location of the master options file. Java property takes precedence over everything.
@@ -193,7 +193,7 @@ public class Utils
             {
                 try
                 {
-                    Iterator<String> iterator = GameSettings.COLON_SPLITTER.omitEmptyStrings().limit(2).split(s).iterator();
+                    Iterator<String> iterator = Splitter.on(':').limit(2).omitEmptyStrings().limit(2).split(s).iterator();
                     options.put(iterator.next(), iterator.next());
                 }
                 catch (Exception e)
@@ -279,10 +279,8 @@ public class Utils
     void replaceVanillaOptions()
     {
         // Writes all the options in a vanilla format to the options.txt file
-        PrintWriter printWriter = null;
-        try
+        try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8)))
         {
-            printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8));
 
             for (Map.Entry<String, String> option : masterOptions.entrySet())
             {
@@ -293,11 +291,6 @@ public class Utils
         catch (IOException e)
         {
             e.printStackTrace();
-        }
-        finally
-        {
-           if (printWriter != null)
-               printWriter.close();
         }
 
         // We need to load our settings now so it is applied to minecraft.
