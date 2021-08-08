@@ -6,15 +6,12 @@ import java.util.*;
 
 import com.google.common.base.Splitter;
 import org.apache.commons.io.IOUtils;
-import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundSource;
 
 public class Utils
 {
-
     private File masterFolder;
     private File masterSettingFile;
     private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
@@ -24,9 +21,9 @@ public class Utils
     private List<String> optionsRaw;
     private Properties properties = new Properties();
     private static final Splitter EQUALS_SPLITTER = Splitter.on('=');
-    File vanillaSettings = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().options, "field_74354_ai");
-    private TranslationTextComponent autoLoadFalse = new TranslationTextComponent("globalsettings.autoload.button.false");
-    private TranslationTextComponent autoLoadTrue = new TranslationTextComponent("globalsettings.autoload.button.true");
+    File vanillaSettings = Minecraft.getInstance().options.getFile();//ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().options, "field_74354_ai");
+    private TranslatableComponent autoLoadFalse = new TranslatableComponent("globalsettings.autoload.button.false");
+    private TranslatableComponent autoLoadTrue = new TranslatableComponent("globalsettings.autoload.button.true");
 
     // We need to set the location of the master options file. Java property takes precedence over everything.
     void setMasterFile()
@@ -307,13 +304,13 @@ public class Utils
         // We need to load our settings now so it is applied to minecraft.
         Minecraft.getInstance().options.load();
         // Then we need to apply the sound changes to the game else they never update.
-        for (SoundCategory sound : SoundCategory.values())
+        for (SoundSource sound : SoundSource.values())
         {
             Minecraft.getInstance().options.setSoundCategoryVolume(sound, Minecraft.getInstance().options.getSoundSourceVolume(sound));
         }
     }
 
-    TranslationTextComponent getAutoloadState()
+    TranslatableComponent getAutoloadState()
     {
         if (masterOptions.getOrDefault("autoLoad", "false").equals("false"))
             return autoLoadFalse;
