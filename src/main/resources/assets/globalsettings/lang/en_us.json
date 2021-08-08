@@ -1,0 +1,6 @@
+{
+  "globalsettings.autoload.button.true": "Auto-Load Options: TRUE",
+  "globalsettings.autoload.button.false": "Auto-Load Options: FALSE",
+  "globalsettings.master.load.button": "Load Master",
+  "globalsettings.master.update.button": "Update Master"
+}
