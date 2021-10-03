@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class Utils
@@ -16,13 +17,16 @@ public class Utils
 
     private File masterFolder;
     private File masterSettingFile;
-    File vanillaSettings = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().gameSettings, "field_74354_ai");
-    private final Map<String, String> masterOptions = new HashMap<>();
-    private final Map<String, String> options = new HashMap<>();
+    private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
+    private Map<String, String> masterOptions = new HashMap<>();
+    private Map<String, String> options = new HashMap<>();
     private List<String> masterOptionsRaw;
     private List<String> optionsRaw;
-    private final Properties properties = new Properties();
+    private Properties properties = new Properties();
     private static final Splitter EQUALS_SPLITTER = Splitter.on('=');
+    File vanillaSettings = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().options, "field_74354_ai");
+    private TranslationTextComponent autoLoadFalse = new TranslationTextComponent("globalsettings.autoload.button.false");
+    private TranslationTextComponent autoLoadTrue = new TranslationTextComponent("globalsettings.autoload.button.true");
 
     // We need to set the location of the master options file. Java property takes precedence over everything.
     void setMasterFile()
@@ -193,7 +197,7 @@ public class Utils
             {
                 try
                 {
-                    Iterator<String> iterator = Splitter.on(':').limit(2).omitEmptyStrings().limit(2).split(s).iterator();
+                    Iterator<String> iterator = OPTION_SPLITTER.omitEmptyStrings().limit(2).split(s).iterator();
                     options.put(iterator.next(), iterator.next());
                 }
                 catch (Exception e)
@@ -279,8 +283,10 @@ public class Utils
     void replaceVanillaOptions()
     {
         // Writes all the options in a vanilla format to the options.txt file
-        try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8)))
+        PrintWriter printWriter = null;
+        try
         {
+            printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8));
 
             for (Map.Entry<String, String> option : masterOptions.entrySet())
             {
@@ -292,21 +298,28 @@ public class Utils
         {
             e.printStackTrace();
         }
+        finally
+        {
+           if (printWriter != null)
+               printWriter.close();
+        }
 
         // We need to load our settings now so it is applied to minecraft.
-        Minecraft.getInstance().gameSettings.loadOptions();
+        Minecraft.getInstance().options.load();
         // Then we need to apply the sound changes to the game else they never update.
         for (SoundCategory sound : SoundCategory.values())
         {
-            Minecraft.getInstance().gameSettings.setSoundLevel(sound, Minecraft.getInstance().gameSettings.getSoundLevel(sound));
+            Minecraft.getInstance().options.setSoundCategoryVolume(sound, Minecraft.getInstance().options.getSoundSourceVolume(sound));
         }
     }
 
-    String getAutoloadState()
+    TranslationTextComponent getAutoloadState()
     {
-        if (masterOptions.get("autoLoad") == null)
-            return "false";
+        if (masterOptions.getOrDefault("autoLoad", "false").equals("false"))
+            return autoLoadFalse;
         else
-            return masterOptions.get("autoLoad");
+        {
+            return autoLoadTrue;
+        }
     }
 }
