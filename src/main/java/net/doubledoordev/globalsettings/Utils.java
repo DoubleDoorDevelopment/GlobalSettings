@@ -14,15 +14,12 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class Utils
 {
-
     private File masterFolder;
     private File masterSettingFile;
     private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
-    private Map<String, String> masterOptions = new HashMap<>();
-    private Map<String, String> options = new HashMap<>();
-    private List<String> masterOptionsRaw;
-    private List<String> optionsRaw;
-    private Properties properties = new Properties();
+    private final Map<String, String> masterOptions = new HashMap<>();
+    private final Map<String, String> options = new HashMap<>();
+    private final Properties properties = new Properties();
     private static final Splitter EQUALS_SPLITTER = Splitter.on('=');
     File vanillaSettings = ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().options, "field_74354_ai");
     private TranslationTextComponent autoLoadFalse = new TranslationTextComponent("globalsettings.autoload.button.false");
@@ -172,8 +169,8 @@ public class Utils
             vanillaFileInput = new FileInputStream(vanillaSettings);
 
             // Read the master and vanilla settings file and put them into a list for manipulation.
-            masterOptionsRaw = IOUtils.readLines(masterFileInput, "UTF-8");
-            optionsRaw = IOUtils.readLines(vanillaFileInput, "UTF-8");
+            List<String> masterOptionsRaw = IOUtils.readLines(masterFileInput, "UTF-8");
+            List<String> optionsRaw = IOUtils.readLines(vanillaFileInput, "UTF-8");
 
             // If our master file exists we need to split the values and populate the map with them for comparing. Also handles bad values.
             if (masterSettingFile.exists())
@@ -283,11 +280,8 @@ public class Utils
     void replaceVanillaOptions()
     {
         // Writes all the options in a vanilla format to the options.txt file
-        PrintWriter printWriter = null;
-        try
+        try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8)))
         {
-            printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8));
-
             for (Map.Entry<String, String> option : masterOptions.entrySet())
             {
                 printWriter.println(option.getKey() + ":" + option.getValue());
@@ -297,11 +291,6 @@ public class Utils
         catch (IOException e)
         {
             e.printStackTrace();
-        }
-        finally
-        {
-           if (printWriter != null)
-               printWriter.close();
         }
 
         // We need to load our settings now so it is applied to minecraft.
