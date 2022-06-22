@@ -21,7 +21,7 @@ public class Utils
     private List<String> optionsRaw;
     private Properties properties = new Properties();
     private static final Splitter EQUALS_SPLITTER = Splitter.on('=');
-    File vanillaSettings = Minecraft.getInstance().options.getFile();//ObfuscationReflectionHelper.getPrivateValue(GameSettings.class, Minecraft.getInstance().options, "field_74354_ai");
+    File vanillaSettings = Minecraft.getInstance().options.getFile();
     private TranslatableComponent autoLoadFalse = new TranslatableComponent("globalsettings.autoload.button.false");
     private TranslatableComponent autoLoadTrue = new TranslatableComponent("globalsettings.autoload.button.true");
 
@@ -280,11 +280,8 @@ public class Utils
     void replaceVanillaOptions()
     {
         // Writes all the options in a vanilla format to the options.txt file
-        PrintWriter printWriter = null;
-        try
+        try (PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8)))
         {
-            printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.vanillaSettings), StandardCharsets.UTF_8));
-
             for (Map.Entry<String, String> option : masterOptions.entrySet())
             {
                 printWriter.println(option.getKey() + ":" + option.getValue());
@@ -294,11 +291,6 @@ public class Utils
         catch (IOException e)
         {
             e.printStackTrace();
-        }
-        finally
-        {
-           if (printWriter != null)
-               printWriter.close();
         }
 
         // We need to load our settings now so it is applied to minecraft.
