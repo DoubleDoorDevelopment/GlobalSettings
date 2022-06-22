@@ -7,7 +7,7 @@ import java.util.*;
 import com.google.common.base.Splitter;
 import org.apache.commons.io.IOUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 
 public class Utils
@@ -15,15 +15,15 @@ public class Utils
     private File masterFolder;
     private File masterSettingFile;
     private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
-    private Map<String, String> masterOptions = new HashMap<>();
-    private Map<String, String> options = new HashMap<>();
+    private final Map<String, String> masterOptions = new HashMap<>();
+    private final Map<String, String> options = new HashMap<>();
     private List<String> masterOptionsRaw;
     private List<String> optionsRaw;
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
     private static final Splitter EQUALS_SPLITTER = Splitter.on('=');
     File vanillaSettings = Minecraft.getInstance().options.getFile();
-    private TranslatableComponent autoLoadFalse = new TranslatableComponent("globalsettings.autoload.button.false");
-    private TranslatableComponent autoLoadTrue = new TranslatableComponent("globalsettings.autoload.button.true");
+    private final Component autoLoadFalse = Component.translatable("globalsettings.autoload.button.false");
+    private final Component autoLoadTrue = Component.translatable("globalsettings.autoload.button.true");
 
     // We need to set the location of the master options file. Java property takes precedence over everything.
     void setMasterFile()
@@ -302,7 +302,7 @@ public class Utils
         }
     }
 
-    TranslatableComponent getAutoloadState()
+    Component getAutoloadState()
     {
         if (masterOptions.getOrDefault("autoLoad", "false").equals("false"))
             return autoLoadFalse;

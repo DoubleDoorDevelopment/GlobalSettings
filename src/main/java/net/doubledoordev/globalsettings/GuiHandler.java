@@ -2,7 +2,7 @@ package net.doubledoordev.globalsettings;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.OptionsScreen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -30,12 +30,12 @@ public class GuiHandler
             }
             GlobalSettings.LOGGER.warn("Auto loading disabled, Manually load master options with load button!");
 
-            e.addListener(new Button(e.getScreen().width / 2 - 195, e.getScreen().height / 6 + 168, 90, 20, new TranslatableComponent("globalsettings.master.load.button"), (button) -> {
+            e.addListener(new Button(e.getScreen().width / 2 - 195, e.getScreen().height / 6 + 168, 90, 20, Component.translatable("globalsettings.master.load.button"), (button) -> {
                 GlobalSettings.LOGGER.info("Attempting to load master file!");
                 util.replaceVanillaOptions();
                 GlobalSettings.LOGGER.info("Loaded Global options!");
             }));
-            e.addListener(new Button(e.getScreen().width / 2 + 105, e.getScreen().height / 6 + 168, 90, 20, new TranslatableComponent("globalsettings.master.update.button"), (button) -> {
+            e.addListener(new Button(e.getScreen().width / 2 + 105, e.getScreen().height / 6 + 168, 90, 20, Component.translatable("globalsettings.master.update.button"), (button) -> {
                 GlobalSettings.LOGGER.info("Updating master file!");
                 util.getAllOptions();
                 util.updateMaster();
